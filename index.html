@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Startup Trail: The Road to Launch City</title>
+<style>
+:root{--bg:#17120e;--card:#241c15;--card2:#32271c;--ink:#fff6e3;--mut:#e0d2b3;--gold:#ffd24a;--red:#ff8a78;--green:#6ef0a0;--blue:#8cc8ff;--line:#8a6d3f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.55 system-ui,"Segoe UI",Arial,sans-serif}
+#app{max-width:1000px;margin:0 auto;padding:12px}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:8px}
+h1{font:800 24px ui-monospace,Consolas,monospace;color:var(--gold);margin:0;letter-spacing:1px;text-shadow:2px 2px 0 #000}
+h2{font:700 22px ui-monospace,Consolas,monospace;margin:0 0 8px;color:var(--gold)}
+h2 .role{font:500 15px system-ui,sans-serif;color:var(--mut);margin-left:10px}
+h2.ok{color:var(--green)}h2.no{color:var(--red)}
+#ctrl{display:flex;gap:6px;flex-wrap:wrap}
+.btn{font:700 17px system-ui,sans-serif;min-height:44px;padding:8px 16px;border-radius:8px;border:3px solid var(--line);background:var(--card2);color:var(--ink);cursor:pointer;transition:transform .08s}
+.btn:hover{transform:translateY(-2px);border-color:var(--gold)}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:var(--gold);color:#241800;border-color:#fff2b0}
+.btn.alt{background:#1d3550;border-color:#5b8fc0}
+.btn.ghost{background:transparent;font-size:15px;min-height:36px}
+.btn.sm{min-height:36px;padding:4px 12px;font-size:15px}
+.btn[aria-pressed="true"]{background:#2d5a3c;border-color:var(--green)}
+.btn[aria-pressed="true"]::before{content:"\2713  "}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+:focus-visible{outline:4px solid #fff;outline-offset:3px}
+#hud{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
+.stat{background:var(--card);border:3px solid var(--line);border-radius:8px;padding:6px 12px;font:700 18px ui-monospace,Consolas,monospace}
+.stat small{display:block;font:600 13px system-ui;color:var(--mut);letter-spacing:.5px}
+.stat.pop{animation:pop .5s}
+.bar{height:8px;background:#000;border-radius:4px;margin-top:2px;overflow:hidden}.bar i{display:block;height:100%;background:var(--gold);transition:width .6s}
+#map ol{list-style:none;display:flex;margin:8px 0;padding:0;gap:4px}
+#map li{flex:1;text-align:center;font:600 13px system-ui;padding:6px 2px;border-radius:6px;background:var(--card);border:2px solid #4a3a26;color:var(--mut)}
+#map li.done{background:#2d5a3c;border-color:var(--green);color:#fff}
+#map li.done::after{content:" \2713"}
+#map li.cur{background:var(--gold);color:#241800;border-color:#fff2b0}
+#scene{width:100%;aspect-ratio:8/3;image-rendering:pixelated;border:4px solid var(--line);border-radius:8px;display:block;background:#000}
+#panel{background:var(--card);border:4px solid var(--line);border-radius:8px;padding:18px 22px;margin-top:10px;min-height:280px}
+#panel h2:focus{outline:none}
+.say{font-size:20px;margin:6px 0 14px;min-height:3.2em}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:flex-end;margin-top:12px}
+.asks{display:flex;flex-wrap:wrap;gap:8px;margin-right:auto;align-items:center}.asks .lbl{color:var(--mut);font-size:15px}
+.opts{display:grid;gap:10px}.opt{text-align:left}
+.card{background:var(--card2);border:3px solid #5a4630;border-radius:8px;padding:10px 14px;margin:8px 0}
+table{border-collapse:collapse;width:100%;margin:8px 0}
+caption{text-align:left;color:var(--mut);font-size:15px;padding-bottom:4px}
+th,td{border:2px solid #5a4630;padding:6px 10px;text-align:left}th{background:#3b2d1d}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.big{font:800 26px ui-monospace,Consolas,monospace;color:var(--gold)}
+.dots{display:flex;flex-wrap:wrap;gap:3px;min-height:22px}
+.dots i{width:14px;height:14px;background:var(--blue);border:2px solid #fff;animation:pop .35s both}
+.cells{display:grid;grid-template-columns:repeat(30,1fr);gap:2px;margin:8px 0}
+.cells b{aspect-ratio:1;font:700 11px ui-monospace;display:grid;place-items:center;border:1px solid #000;color:#000;animation:pop .3s}
+.cells b.N{background:#8cc8ff}.cells b.W{background:#ffb86b}.cells b.S{background:#6ef0a0}.cells b.E{background:#3a2c1d;border:1px dashed #8a6d3f}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+canvas.chart{width:100%;max-width:640px;background:#120d09;border:3px solid var(--line);border-radius:6px;display:block;margin:6px 0}
+.tag{display:inline-block;padding:1px 8px;border:2px solid var(--line);border-radius:6px;font-size:14px;margin-left:6px}
+@keyframes pop{0%{transform:scale(.4)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+body.noanim *{animation:none!important;transition:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:640px){body{font-size:16px}#hud{grid-template-columns:1fr 1fr}#map li{font-size:11px}.cells{grid-template-columns:repeat(15,1fr)}}
+@media print{#ctrl,#map,#scene,#hud,.noprint{display:none!important}body{background:#fff;color:#000}#panel{border:1px solid #000;background:#fff;color:#000}}
+</style>
+</head>
+<body>
+<div id="app">
+ <header>
+  <h1>STARTUP TRAIL</h1>
+  <div id="ctrl" role="group" aria-label="Game settings">
+   <button class="btn sm" id="bVoice" type="button" aria-pressed="true">Voice</button>
+   <button class="btn sm" id="bSfx" type="button" aria-pressed="true">Sound effects</button>
+   <button class="btn sm" id="bAnim" type="button" aria-pressed="true">Animation</button>
+  </div>
+ </header>
+ <div id="hud" role="group" aria-label="Your business stats">
+  <div class="stat" id="sCash"><small>CASH</small><span>$5,000</span></div>
+  <div class="stat" id="sRep"><small>REPUTATION</small><span>50</span><div class="bar"><i style="width:50%"></i></div></div>
+  <div class="stat" id="sScore"><small>SCORE</small><span>0</span></div>
+ </div>
+ <nav id="map" aria-label="Trail progress"><ol></ol></nav>
+ <canvas id="scene" width="320" height="120" role="img" aria-label="Pixel art scene of your food wagon on the trail"></canvas>
+ <main id="panel"></main>
+ <div id="sr" class="sr-only" aria-live="assertive"></div>
+</div>
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s);
+const fmt=n=>(n<0?'-$':'$')+Math.abs(Math.round(n)).toLocaleString('en-US');
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+const S={lvl:0,cash:5000,rep:50,score:0,stars:[],tr:0,voice:true,sfx:true,anim:!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)};
+
+/* ---------- sound effects ---------- */
+let AC;
+function beep(f,d,type,v,delay){if(!S.sfx)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+(delay||0);o.type=type||'square';o.frequency.value=f;o.connect(g);g.connect(AC.destination);g.gain.setValueAtTime(v||.04,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.start(t);o.stop(t+d);}catch(e){}}
+const sfx={click:()=>beep(520,.06),good:()=>{beep(660,.1);beep(880,.14,0,0,.1);beep(1175,.2,0,0,.22)},bad:()=>{beep(220,.22,'sawtooth');beep(150,.3,'sawtooth',.04,.18)},coin:()=>{beep(988,.07);beep(1319,.16,0,0,.07)},boom:()=>beep(90,.5,'sawtooth',.06)};
+
+/* ---------- narration (browser voice) ---------- */
+let voice=null;
+function pickVoice(){if(!('speechSynthesis' in window))return;const vs=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang));const pref=[/natural/i,/neural/i,/aria|jenny|davis|guy/i,/google us english/i,/samantha|ava|allison|serena|karen|zira/i];for(const p of pref){const f=vs.find(v=>p.test(v.name));if(f){voice=f;return;}}voice=vs[0]||null;}
+if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
+function speak(t,pitch){if(!S.voice||!('speechSynthesis' in window)||!t)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);if(voice)u.voice=voice;u.rate=.96;u.pitch=pitch||1;speechSynthesis.speak(u);}catch(e){}}
+
+/* ---------- pixel scene ---------- */
+const cv=$('#scene'),cx=cv.getContext('2d'),W=320,H=120;
+const TH=[
+{n:'Idea Gulch',sky:['#ff9f5e','#ffe9ad'],far:'#b8764a',mid:'#8aa04e',gr:'#6a9440',gr2:'#5a8434',lm:'sign',sun:1},
+{n:'Margin Meadow',sky:['#6ec1ff','#e0f5ff'],far:'#86b7a8',mid:'#62b25c',gr:'#4fa04c',gr2:'#418f40',lm:'stall'},
+{n:'Budget Bridge',sky:['#92b0ff','#eaeeff'],far:'#8b90bd',mid:'#6e9f80',gr:'#5a8c62',gr2:'#4c7c54',lm:'bridge'},
+{n:'Credit Crossing',sky:['#74cfd8','#e4fcf6'],far:'#6b9fae',mid:'#5ea08f',gr:'#4c8f7c',gr2:'#407f6c',lm:'bank'},
+{n:'Storm Pass',sky:['#2e3350','#6a708f'],far:'#464b68',mid:'#363b52',gr:'#36463f',gr2:'#2b3833',lm:'cave',storm:1},
+{n:'Compound Canyon',sky:['#2a1a4d','#ff8a5c'],far:'#a84f3a',mid:'#c8663e',gr:'#a8552f',gr2:'#944a29',lm:'arch',stars:1},
+{n:'Launch City',sky:['#1a1f4d','#ff9a6b'],far:'#3b3f7a',mid:'#2e326a',gr:'#4a5a4a',gr2:'#3e4e3e',lm:'city',stars:1}
+];
+const NPCC=[['#ffcf9e','#3a6ea5','#e8453c'],['#e0ac7a','#a8552f','#7a4a1a'],['#f2c9a0','#6b3fa0','#ffd24a'],['#c68c5a','#2f7a5a','#333'],['#ffd0a8','#c0392b','#2b5a2b'],['#d9a070','#e0a030','#5a2f7a']];
+const sc={mode:'stop',th:0,tp:0,cb:null,fire:[],flash:0,storm:0};
+let T=0,scroll=0;
+function R(x,y,w,h,c){cx.fillStyle=c;cx.fillRect(Math.round(x),Math.round(y),w,h);}
+function rnd(i){const x=Math.sin(i*127.1)*43758.5453;return x-Math.floor(x);}
+function hills(base,amp,f,k,c){cx.fillStyle=c;for(let x=0;x<W;x+=2){const y=base+Math.sin((x+scroll*k)/f)*amp+Math.sin((x+scroll*k)/(f*.43))*amp*.4;cx.fillRect(x,Math.round(y),2,H-y);}}
+function wheel(x,y,r){cx.save();cx.translate(x,y);cx.rotate(T*(sc.mode==='travel'?9:0));cx.fillStyle='#2a1a0c';cx.beginPath();cx.arc(0,0,r,0,7);cx.fill();cx.fillStyle='#c89b5c';cx.beginPath();cx.arc(0,0,r-1.5,0,7);cx.fill();cx.strokeStyle='#2a1a0c';cx.lineWidth=1;cx.beginPath();cx.moveTo(-r,0);cx.lineTo(r,0);cx.moveTo(0,-r);cx.lineTo(0,r);cx.stroke();cx.restore();}
+function wagon(x,y){const mv=sc.mode==='travel'&&S.anim,b=mv?Math.round(Math.sin(T*16)):0;
+ R(x,y-17+b,36,10,'#8a4b1f');R(x,y-17+b,36,2,'#b06a30');
+ R(x+2,y-27+b,32,10,'#fff3d6');R(x+5,y-30+b,26,3,'#fff3d6');R(x+9,y-25+b,18,5,'#e8453c');R(x+11,y-24+b,14,1,'#fff3d6');
+ wheel(x+9,y-5+b,6);wheel(x+28,y-5+b,6);
+ R(x+36,y-13+b,9,1,'#222');
+ const lg=mv?Math.sin(T*16)*2:0;
+ R(x+44,y-21+b,18,9,'#6b3e1e');R(x+58,y-28+b,8,9,'#6b3e1e');R(x+64,y-25+b,4,4,'#4a2a12');R(x+58,y-31+b,2,4,'#4a2a12');R(x+60,y-27+b,1,1,'#fff');
+ R(x+46,y-12+b,3,12+lg,'#4a2a12');R(x+52,y-12+b,3,12-lg,'#4a2a12');R(x+60,y-12+b,3,12-lg,'#4a2a12');R(x+43,y-20+b,2,7,'#3a200e');}
+function person(x,y,i,talk){const c=NPCC[i%NPCC.length],b=S.anim?Math.round(Math.sin(T*3+i)):0;
+ R(x+1,y-24+b,8,8,c[0]);R(x,y-27+b,10,4,c[2]);R(x+2,y-21+b,1,1,'#000');R(x+6,y-21+b,1,1,'#000');
+ R(x,y-16+b,10,11,c[1]);R(x-2,y-15+b,2,8,c[1]);R(x+10,y-15+b,2,8,c[1]);R(x+1,y-5,3,5,'#2a2a3a');R(x+6,y-5,3,5,'#2a2a3a');
+ if(talk&&S.anim&&Math.floor(T*2)%2===0){R(x+11,y-36,12,8,'#fff');R(x+13,y-33,2,2,'#222');R(x+17,y-33,2,2,'#222');R(x+21,y-33,2,2,'#222');}}
+function pine(x,y,s){R(x+s,y-6,3,6,'#4a2f18');for(let i=0;i<4;i++)R(x+i*1.5,y-8-i*6,s*2+3-i*3,7,'#1f5a32');}
+function landmark(k,x,y){
+ if(k==='sign'){R(x,y-34,3,34,'#6b4a2a');R(x-14,y-38,32,12,'#c89b5c');R(x-12,y-36,28,2,'#8a5a2b');R(x-10,y-32,22,2,'#5a3a1a');R(x-10,y-29,16,2,'#5a3a1a');R(x+24,y-18,22,18,'#d9c9a0');R(x+22,y-22,26,5,'#e8453c');}
+ else if(k==='stall'){for(let i=0;i<8;i++)R(x+i*5,y-34,5,6,i%2?'#fff':'#e8453c');R(x+1,y-28,2,28,'#6b4a2a');R(x+37,y-28,2,28,'#6b4a2a');R(x+3,y-14,34,14,'#8a5a2b');R(x+6,y-19,6,5,'#ffd24a');R(x+16,y-19,6,5,'#6ef0a0');R(x+26,y-19,6,5,'#ff8a78');}
+ else if(k==='bridge'){R(x-34,y-3,110,6,'#2f6fc0');for(let i=0;i<8;i++)R(x-30+((i*14+T*10)%100),y-1,6,1,'#9fd0ff');R(x-20,y-18,80,5,'#a0a0a8');R(x-20,y-18,80,1,'#cfcfd8');R(x-14,y-14,6,14,'#8a8a92');R(x+14,y-14,6,14,'#8a8a92');R(x+42,y-14,6,14,'#8a8a92');R(x-20,y-26,2,10,'#6a6a72');R(x+58,y-26,2,10,'#6a6a72');R(x-20,y-27,80,2,'#6a6a72');}
+ else if(k==='bank'){R(x,y-42,44,42,'#efe6cf');R(x-3,y-46,50,6,'#c9bf9f');R(x+19,y-54,6,8,'#c9bf9f');for(let i=0;i<4;i++)R(x+4+i*10,y-34,4,28,'#d6ccb0');R(x+16,y-14,12,14,'#5a3a1a');R(x+14,y-40,16,4,'#ffd24a');R(x+21,y-39,2,2,'#7a5a00');}
+ else if(k==='cave'){R(x-6,y-30,52,30,'#2a2e3a');R(x+4,y-34,32,8,'#2a2e3a');R(x+8,y-22,24,22,'#07080c');R(x+12,y-28,16,8,'#07080c');R(x-8,y-14,10,14,'#3a3e4c');R(x+38,y-10,10,10,'#3a3e4c');}
+ else if(k==='arch'){R(x-6,y-40,12,40,'#b3532f');R(x+40,y-40,12,40,'#b3532f');R(x-8,y-46,62,10,'#c8663e');R(x-4,y-50,54,6,'#d9764a');R(x+10,y-36,26,8,'#c8663e');R(x+18,y-30,10,2,'#ffb070');}
+ else if(k==='city'){const hs=[34,48,28,56,40,30,50];for(let i=0;i<7;i++){const h=hs[i];R(x-20+i*12,y-h,10,h,'#1d2150');for(let j=0;j<h-6;j+=6)if(rnd(i*9+j)>.35)R(x-18+i*12,y-h+j+3,2,3,'#ffe27a');}R(x-30,y-3,100,3,'#555');}}
+function drawScene(){
+ const th=TH[sc.th],g=cx.createLinearGradient(0,0,0,84);g.addColorStop(0,th.sky[0]);g.addColorStop(1,th.sky[1]);cx.fillStyle=g;cx.fillRect(0,0,W,H);
+ if(th.stars)for(let i=0;i<40;i++)if(i%3||Math.sin(T*3+i)>-.5)R(rnd(i)*W,rnd(i+50)*50,1,1,'#fff');
+ if(th.sun){R(244,22,22,22,'#fff3a0');R(248,18,14,30,'#fff3a0');R(240,26,30,14,'#fff3a0');}
+ if(!th.stars&&!th.storm)for(let i=0;i<4;i++){const cxp=((i*90-scroll*.15)%380+380)%380-40;R(cxp,14+i*9,28,6,'#ffffffcc');R(cxp+6,10+i*9,16,6,'#ffffffcc');}
+ hills(60,10,34,.2,th.far);hills(72,7,22,.5,th.mid);
+ if(sc.th!==2&&sc.th!==3)for(let i=0;i<6;i++){const px=((i*70-scroll*.7)%420+420)%420-30;pine(px,86,3);}
+ R(0,84,W,36,th.gr);for(let i=0;i<14;i++){const sx=((i*30-scroll)%360+360)%360-20;R(sx,88+(i%3)*8,16,2,th.gr2);}
+ R(0,96,W,12,'#8a6a3c');R(0,96,W,1,'#b08a50');for(let i=0;i<10;i++){const dx=((i*40-scroll*1.2)%400+400)%400-20;R(dx,102,16,2,'#6b4f28');}
+ let lx=250;if(sc.mode==='travel'){const e=1-Math.pow(1-sc.tp,3);lx=420-e*(420-250);}
+ landmark(th.lm,lx,96);
+ if(sc.th===5||sc.th===6){}
+ if(sc.mode==='stop'&&sc.npc!=null)person(196,96,sc.npc,sc.talk);
+ wagon(sc.mode==='travel'?44+Math.sin(T*2)*2:40,100);
+ if(th.storm||sc.storm){cx.fillStyle='#bcd4ffaa';for(let i=0;i<60;i++){const rx=((rnd(i)*W*1.3-T*140*(0.6+rnd(i+9)*.5))%(W*1.3)+W*1.3)%(W*1.3),ry=((rnd(i+3)*H+T*320)%H);cx.fillRect(Math.round(rx-20),Math.round(ry),1,5);}
+  if(sc.flash>0){cx.fillStyle='rgba(255,255,255,'+Math.min(.7,sc.flash)+')';cx.fillRect(0,0,W,H);R(160,0,2,20,'#fff');R(158,20,2,18,'#fff');R(160,38,2,14,'#fff');sc.flash-=.08;}
+  else if(sc.storm>1&&Math.random()<.02)sc.flash=1;}
+ sc.fire=sc.fire.filter(p=>p.l>0);for(const p of sc.fire){p.x+=p.vx;p.y+=p.vy;p.vy+=.03;p.l-=.012;R(p.x,p.y,2,2,p.c);}
+ if(sc.th===6&&S.anim&&Math.random()<.05)burst(40+Math.random()*240,20+Math.random()*30);
+}
+function burst(x,y){const c=['#ffd24a','#ff6b57','#6ef0a0','#8cc8ff','#fff'][Math.floor(Math.random()*5)];for(let i=0;i<24;i++){const a=i/24*6.28,s=.5+Math.random()*1.2;sc.fire.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:1,c});}}
+let last=0;
+function frame(ts){const dt=Math.min(.05,((ts-last)/1000)||0);last=ts;
+ if(S.anim){T+=dt;if(sc.mode==='travel'){sc.tp=Math.min(1,sc.tp+dt/3.4);scroll+=dt*(sc.tp<.85?120:120*(1-sc.tp)/.15+10);}else scroll+=dt*(sc.th===4?6:2);}
+ else if(sc.mode==='travel')sc.tp=1;
+ if(sc.mode==='travel'&&sc.tp>=1){sc.mode='stop';const cb=sc.cb;sc.cb=null;cb&&cb();}
+ drawScene();requestAnimationFrame(frame);}
+function setScene(th,opts){sc.th=th;Object.assign(sc,opts||{});cv.setAttribute('aria-label','Pixel art scene: '+TH[th].n+'. Your food wagon is '+(sc.mode==='travel'?'traveling.':'stopped.'));}
+function travelTo(th,cb){sc.th=th;sc.mode='travel';sc.tp=0;sc.cb=cb;sc.npc=null;sc.talk=false;sc.storm=0;cv.setAttribute('aria-label','Pixel art scene: your wagon is traveling to '+TH[th].n);}
+
+/* ---------- UI helpers ---------- */
+const P=$('#panel');
+function el(tag,at,...kids){const e=document.createElement(tag);for(const k in at||{}){if(k==='class')e.className=at[k];else if(k.slice(0,2)==='on')e.addEventListener(k.slice(2),at[k]);else e.setAttribute(k,at[k]);}kids.flat().forEach(c=>{if(c==null||c==='')return;e.append(c.nodeType?c:document.createTextNode(c));});return e;}
+function btn(label,fn,cls,extra){return el('button',Object.assign({class:'btn '+(cls||''),type:'button',onclick:()=>{sfx.click();fn();}},extra||{}),label);}
+function show(...nodes){P.replaceChildren(...nodes);const h=P.querySelector('h2');if(h){h.tabIndex=-1;h.focus({preventScroll:true});}}
+function announce(t){const s=$('#sr');s.textContent='';setTimeout(()=>{s.textContent=t;},60);}
+function hud(flash){const c=$('#sCash span'),r=$('#sRep span'),sc2=$('#sScore span');c.textContent=fmt(S.cash);r.textContent=S.rep;$('#sRep .bar i').style.width=S.rep+'%';sc2.textContent=S.score;if(flash)['#sCash','#sRep','#sScore'].forEach(id=>{const e=$(id);e.classList.remove('pop');void e.offsetWidth;e.classList.add('pop');});
+ const names=['Start-Up Costs','Pricing','Budget','Credit','Risk','Investing'];const ol=$('#map ol');ol.replaceChildren(...names.map((n,i)=>{const li=el('li',{class:i<S.lvl?'done':i===S.lvl&&S.lvl<6?'cur':''},(i+1)+'. '+n);if(i===S.lvl&&S.lvl<6)li.setAttribute('aria-current','step');return li;}));}
+function bump(cash,rep,score){S.cash+=cash;S.rep=clamp(S.rep+rep,0,100);S.score+=score;if(cash>0)sfx.coin();hud(true);}
+function fb(ok,msg,label,fn,extra){ok?sfx.good():sfx.bad();show(el('h2',{class:ok?'ok':'no'},ok?'Correct':'Not quite'),el('p',{class:'say'},msg),extra||'',el('div',{class:'row'},btn(label,fn,'primary')));speak(msg,1);announce((ok?'Correct. ':'Not quite. ')+msg);}
+function talk(npc,lines,done){let i=0;
+ const run=()=>{const L=lines[i],text=typeof L==='string'?L:L.t;let typing=null,cur=text;
+  const p=el('p',{class:'say','aria-live':'off'}),ctl=el('div',{class:'row'});
+  const put=t=>{if(typing)clearInterval(typing);cur=t;speak(t,npc.pitch);if(!S.anim){p.textContent=t;typing=null;sc.talk=false;return;}sc.talk=true;p.textContent='';let k=0;typing=setInterval(()=>{k+=2;p.textContent=t.slice(0,k);if(k>=t.length){clearInterval(typing);typing=null;sc.talk=false;}},20);};
+  const next=btn(i<lines.length-1?'Next':'Continue',()=>{if(typing){clearInterval(typing);typing=null;p.textContent=cur;sc.talk=false;return;}sc.talk=false;i++;i<lines.length?run():done();},'primary');
+  show(el('h2',{},npc.name,el('span',{class:'role'},npc.role)),p,ctl);put(text);
+  if(L.ask){const asks=el('div',{class:'asks'},el('span',{class:'lbl'},'Ask a question:'));L.ask.forEach(o=>{const b=btn(o.q,()=>{b.remove();put(o.a);announce(o.a);next.focus();},'alt');asks.append(b);});ctl.append(asks);}
+  if(S.voice&&'speechSynthesis' in window)ctl.append(btn('Hear again',()=>speak(cur,npc.pitch),'ghost'));
+  ctl.append(next);};
+ run();}
+function mcq(o){const order=shuffle(o.opts.map((_,i)=>i)),list=el('div',{class:'opts'});
+ order.forEach((oi,k)=>list.append(btn(String.fromCharCode(65+k)+'. '+o.opts[oi],()=>{if(oi===o.ci){fb(true,o.ok,o.next||'Keep going',o.done);}else{S.tr++;fb(false,o.hint,'Try again',()=>mcq(o));}},'opt')));
+ show(el('h2',{},o.title||'Challenge'),o.pre||'',el('p',{class:'say'},o.q),list);speak(o.q,1);}
+const pts=()=>[100,70,40][Math.min(S.tr,2)];
+function passLevel(n,msg,extraCash){const p=pts(),stars=3-Math.min(S.tr,2),rep=[8,5,2][Math.min(S.tr,2)],cash=500+(extraCash||0);S.stars[n]=stars;
+ bump(cash,rep,p);
+ show(el('h2',{class:'ok'},'Stop '+(n+1)+' cleared!'),el('p',{class:'say'},msg),el('div',{class:'card'},'Trail bonus: ',el('b',{},'+'+fmt(cash)),'   Reputation: ',el('b',{},'+'+rep),'   Points: ',el('b',{},'+'+p),'   Rating: ',el('b',{},'★'.repeat(stars)+'☆'.repeat(3-stars)+' ('+stars+' of 3)')),el('div',{class:'row'},btn(n<5?'Roll on to the next stop':'Head to Launch City',()=>{S.lvl=n+1;hud();startLevel(S.lvl);},'primary')));
+ sfx.good();speak('Stop cleared. '+msg,1);announce('Stop '+(n+1)+' cleared. '+stars+' of 3 stars.');}
+
+/* ---------- LEVEL 1: start-up costs ---------- */
+const MARA={name:'Mara Quinn',role:'Founder and Mentor',pitch:1.08};
+function L1(){S.tr=0;
+ talk(MARA,[
+ 'Welcome to the Startup Trail. You are launching a mobile food business called Trailblazer Bowls, and the road to Launch City passes through six stops. Each stop tests one money skill. Pass the challenge and the wagon rolls on.',
+ {t:'First stop: start-up costs. Before you sell a single bowl, you will owe bills that do not care how many bowls you sell.',ask:[{q:'What are those bills called?',a:'Fixed costs. A truck lease, permits, and insurance stay the same whether you sell ten bowls or ten thousand. Variable costs, like ingredients and packaging, rise with every bowl you make.'},{q:'Why does this matter?',a:'Your fixed costs set your finish line. Until sales cover them, you are losing money. Knowing that number is how founders decide whether an idea is worth the risk.'}]},
+ 'Sort your costs first. Then we will find your break-even point, the number of bowls where you stop losing money.'
+ ],L1a);}
+function L1a(){const items=[['Truck lease','F'],['Ingredients for each bowl','V'],['City business permit','F'],['Bowls and packaging','V']],pick={};
+ const rows=el('div',{});items.forEach(([name,t],i)=>{const row=el('div',{class:'card'},el('div',{},el('b',{},name)));const bf=btn('Fixed cost',()=>set(i,'F'),'sm',{'aria-pressed':'false'}),bv=btn('Variable cost',()=>set(i,'V'),'sm',{'aria-pressed':'false'});row.append(el('div',{class:'row',style:'justify-content:flex-start'},bf,bv));row._b={F:bf,V:bv};rows.append(row);items[i].push(row);});
+ const chk=btn('Check my sorting',check,'primary',{disabled:'disabled'});
+ function set(i,v){pick[i]=v;const r=items[i][2]._b;r.F.setAttribute('aria-pressed',v==='F');r.V.setAttribute('aria-pressed',v==='V');if(Object.keys(pick).length===items.length)chk.disabled=false;}
+ function check(){const bad=items.filter((it,i)=>pick[i]!==it[1]).map(it=>it[0]);if(!bad.length){fb(true,'Right. The lease and permit are fixed. Ingredients and packaging are variable. Now for the big question.','Find the break-even point',L1b);}else{S.tr++;fb(false,'Check these again: '+bad.join(', ')+'. Ask yourself, does the cost change when you sell one more bowl?','Try again',()=>{show(h,q,rows,el('div',{class:'row'},chk));});}}
+ const h=el('h2',{},'Challenge: Fixed or variable?'),q=el('p',{class:'say'},'Tap one button for each cost.');
+ show(h,q,rows,el('div',{class:'row'},chk));speak('Challenge. Sort each cost as fixed or variable.',1);}
+function L1b(){mcq({title:'Challenge: Break-even',pre:el('div',{class:'card'},'Fixed costs: ',el('b',{},'$3,000 per month'),'   Price per bowl: ',el('b',{},'$10'),'   Cost to make one bowl: ',el('b',{},'$4')),
+ q:'How many bowls must you sell each month to break even?',opts:['300 bowls','500 bowls','750 bowls','1,000 bowls'],ci:1,
+ ok:'Each bowl leaves $6 after its own costs, called the contribution margin. Three thousand divided by six is 500 bowls. Every bowl after number 500 is profit.',
+ hint:'Each bowl leaves a margin after its own cost: the price minus the cost to make it. Divide the fixed costs by that margin.',done:()=>passLevel(0,'You can now find a break-even point, the first number every founder should know.')});}
+
+/* ---------- LEVEL 2: pricing ---------- */
+const DUSTY={name:'Dusty Calloway',role:'Market Trader',pitch:.82};
+function L2(){S.tr=0;talk(DUSTY,[
+ 'Howdy, founder. Welcome to Margin Meadow, where prices make or break a business. Price too low and customers love you while you go broke. Price too high and the line disappears.',
+ {t:'Every bowl costs you four dollars to make. The question is how much to charge.',ask:[{q:'What is profit?',a:'Profit is revenue minus costs. Revenue is price times bowls sold. Here, profit per bowl is the price minus four dollars, and total profit is that margin times the number of bowls sold.'},{q:'How do I find the best price?',a:'Test it. Higher prices earn more per bowl but fewer people buy. The best price is where total daily profit peaks, not where the price or the crowd is biggest.'}]},
+ 'Try prices at the market stand. Test at least three, then lock in the one that earns the most profit per day.'],L2a);}
+function L2a(){const D={6:200,8:150,10:110,12:70,14:35},tested={};let focusP=null;
+ function render(){const dots=el('div',{class:'dots','aria-hidden':'true'}),cur=render.cur;
+  if(cur)for(let i=0;i<Math.round(D[cur]/10);i++){const d=el('i',{});d.style.animationDelay=(S.anim?i*40:0)+'ms';dots.append(d);}
+  const pb=el('div',{class:'row',style:'justify-content:flex-start'});[6,8,10,12,14].forEach(p=>{const b=btn('Charge $'+p,()=>{tested[p]=1;render.cur=p;focusP=p;sfx.coin();render();announce('At $'+p+', '+D[p]+' bowls sold, profit '+fmt((p-4)*D[p])+' per day.');},'alt',{'data-p':p});pb.append(b);});
+  const tb=el('table',{},el('caption',{},'Results by price. Each square above is 10 bowls sold that day.'),el('tr',{},el('th',{},'Price'),el('th',{},'Bowls per day'),el('th',{},'Profit per day'),el('th',{},'Lock in')));
+  [6,8,10,12,14].forEach(p=>{const t=tested[p];tb.append(el('tr',{},el('td',{},'$'+p),el('td',{},t?String(D[p]):'?'),el('td',{},t?fmt((p-4)*D[p]):'?'),el('td',{},t&&Object.keys(tested).length>=3?btn('Lock in $'+p,()=>lock(p),'sm primary'):(t?'Test 3 prices first':''))));});
+  show(el('h2',{},'Challenge: Find the profit peak'),el('p',{class:'say'},'Tap a price to see how many customers line up.'),pb,dots,tb);
+  if(focusP){const b=P.querySelector('[data-p="'+focusP+'"]');b&&b.focus();}}
+ function lock(p){const pr=(p-4)*D[p];if(p===10){fb(true,'At $10 you sell 110 bowls a day for $660 profit, the highest of any price. Notice $14 earns the most per bowl but loses too many customers.','Continue',()=>passLevel(1,'You found the price that maximizes profit, not just sales or margin.'));}else{S.tr++;fb(false,'At $'+p+' you earn '+fmt(pr)+' per day, but another price earns more. Keep testing the others and compare the profit column.'+(S.tr>=2?' Hint: the peak sits between $8 and $12.':''),'Back to the market',render);}}
+ render();speak('Challenge. Test at least three prices, then lock in the price with the highest daily profit.',1);}
+
+/* ---------- LEVEL 3: budget ---------- */
+const PENNY={name:'Penny Ledger',role:'Budget Boss',pitch:1.15};
+function L3(){S.tr=0;talk(PENNY,[
+ 'Welcome to Budget Bridge. A bridge only holds if the weight is balanced, and so does a paycheck.',
+ {t:'You pay yourself three thousand dollars a month from the business. Before it vanishes, give every dollar a job.',ask:[{q:'What is the 50-30-20 rule?',a:'A simple starting budget: about 50 percent of take-home pay for needs, 30 percent for wants, and 20 percent for savings and paying down debt. It is a guide, not a law, but it gives you a balanced start.'},{q:'What counts as a need?',a:'Needs are costs you must pay to live and work: housing, groceries, utilities, transportation, and minimum debt payments. Wants are extras, like streaming, dining out, and upgrades.'}]},
+ 'Build your budget with 30 blocks of one hundred dollars each. Place every block.'],L3a);}
+function L3a(){const c={N:0,W:0,S:0},nm={N:'Needs',W:'Wants',S:'Savings and debt payoff'};
+ const cells=el('div',{class:'cells','aria-hidden':'true'}),info=el('div',{class:'card','aria-live':'polite'}),grid=el('div',{class:'grid2'}),chk=btn('Check my budget',check,'primary');
+ const refs={};
+ ['N','W','S'].forEach(k=>{const lab=el('b',{id:'lab'+k},nm[k]),val=el('div',{class:'big'});const plus=btn('Add $100',()=>add(k,1),'sm',{'aria-describedby':'lab'+k}),minus=btn('Remove $100',()=>add(k,-1),'sm',{'aria-describedby':'lab'+k});refs[k]=val;grid.append(el('div',{class:'card'},lab,val,el('div',{class:'row',style:'justify-content:flex-start'},minus,plus)));});
+ function used(){return c.N+c.W+c.S;}
+ function upd(){cells.replaceChildren();['N','W','S'].forEach(k=>{for(let i=0;i<c[k];i++)cells.append(el('b',{class:k},k));});for(let i=used();i<30;i++)cells.append(el('b',{class:'E'},'·'));
+  ['N','W','S'].forEach(k=>refs[k].textContent=fmt(c[k]*100)+' ('+Math.round(c[k]/30*100)+'%)');info.textContent='Blocks left to place: '+(30-used())+'. Key: N = needs, W = wants, S = savings and debt payoff.';chk.disabled=used()!==30;}
+ function add(k,d){if(d>0&&used()>=30){sfx.bad();return;}if(d<0&&c[k]<=0)return;c[k]+=d;sfx.click();upd();}
+ function check(){const tgt={N:15,W:9,S:6},off=[];['N','W','S'].forEach(k=>{if(Math.abs(c[k]-tgt[k])>1)off.push(nm[k]+' are '+(c[k]>tgt[k]?'too high':'too low'));});
+  if(!off.length)fb(true,'Balanced. Roughly half to needs, under a third to wants, and about a fifth to savings. Building savings first is how owners survive slow months.','Continue',()=>passLevel(2,'You can now build a balanced budget with the 50-30-20 rule.'));
+  else{S.tr++;fb(false,off.join('. ')+'. Aim for roughly 50 percent needs, 30 percent wants, and 20 percent savings.','Adjust my budget',()=>{show(h,q,grid,cells,info,el('div',{class:'row'},chk));upd();});}}
+ const h=el('h2',{},'Challenge: Build the budget'),q=el('p',{class:'say'},'Take-home pay: $3,000 per month. Place all 30 blocks.');
+ show(h,q,grid,cells,info,el('div',{class:'row'},chk));upd();speak('Challenge. Place all thirty blocks of one hundred dollars across needs, wants, and savings.',1);}
+
+/* ---------- LEVEL 4: credit ---------- */
+const WALT={name:'Walt Teller',role:'Loan Officer',pitch:.9};
+function pmt(P0,apr,n){const r=apr/1200;return P0*r/(1-Math.pow(1+r,-n));}
+function L4(){S.tr=0;talk(WALT,[
+ 'Welcome to Credit Crossing. To buy a ten thousand dollar truck upgrade, you need a loan. Four lenders will compete for your business.',
+ {t:'Borrowing is a tool, and the price tag is the total you repay, not just the monthly payment.',ask:[{q:'What is APR?',a:'Annual percentage rate is the yearly cost of borrowing, shown as a percent. A higher APR means you pay the lender more money for the same loan.'},{q:'What is a credit score?',a:'A number, usually from 300 to 850, that tells lenders how reliably you repay. A higher score earns lower rates, which saves real money.'}]},
+ 'Tap each offer to see what it really costs. Then choose the lender with the lowest total cost.'],L4a);}
+function L4a(){const offers=[
+ {n:'Community Bank loan',d:'7% APR, 36 monthly payments',pm:pmt(10000,7,36),mo:36},
+ {n:'Credit union loan',d:'9% APR, 36 monthly payments',pm:pmt(10000,9,36),mo:36},
+ {n:'Store credit card',d:'24% APR, 36 monthly payments',pm:pmt(10000,24,36),mo:36},
+ {n:'Cash-advance lender',d:'Repay $12,500 in 6 equal payments',pm:12500/6,mo:6}];
+ let sel=-1;const box=el('div',{class:'card','aria-live':'polite'},'Tap an offer to see the numbers.'),list=el('div',{class:'opts'});
+ const bs=offers.map((o,i)=>{const b=btn(o.n+': '+o.d,()=>{sel=i;bs.forEach((x,j)=>x.setAttribute('aria-pressed',j===i));const tot=o.pm*o.mo;box.replaceChildren(el('div',{},'Monthly payment: ',el('b',{},fmt(o.pm))),el('div',{},'Total repaid: ',el('b',{},fmt(tot))),el('div',{},'Cost of borrowing: ',el('b',{class:'big'},fmt(tot-10000))));go.disabled=false;announce(o.n+'. Monthly payment '+fmt(o.pm)+'. Total repaid '+fmt(tot)+'. Cost of borrowing '+fmt(tot-10000)+'.');},'opt alt',{'aria-pressed':'false'});list.append(b);return b;});
+ const go=btn('Choose this lender',()=>{if(sel===0)fb(true,'The community bank costs about $1,116 in interest, the lowest of the four. The cash advance looks simple, but $2,500 over six months is a far higher rate than it seems.','One more question',L4b);else{S.tr++;const mine=offers[sel].pm*offers[sel].mo-10000;fb(false,'That offer costs '+fmt(mine)+' to borrow. Another lender costs less than that. Compare the cost of borrowing on every offer before you choose.','Compare again',()=>show(h,q,list,box,el('div',{class:'row'},go)));}},'primary',{disabled:'disabled'});
+ const h=el('h2',{},'Challenge: Compare the lenders'),q=el('p',{class:'say'},'You are borrowing $10,000. Check all four offers.');
+ show(h,q,list,box,el('div',{class:'row'},go));speak('Challenge. You are borrowing ten thousand dollars. Compare all four offers and choose the one with the lowest total cost.',1);}
+function L4b(){mcq({title:'Quick check: Credit score',q:'Which habit raises your credit score the most over time?',opts:['Paying every bill on time','Closing your oldest credit card','Applying for five loans in one week','Carrying a maxed-out card balance'],ci:0,
+ ok:'On-time payments are the biggest factor in a credit score, and a strong score earns you rates like the bank loan you just chose.',hint:'Lenders care most about whether you repay reliably. Which habit shows that?',done:()=>passLevel(3,'You can now compare loans by total cost, not just the monthly payment.')});}
+
+/* ---------- LEVEL 5: risk ---------- */
+const ROSA={name:'Ranger Rosa Vega',role:'Risk Ranger',pitch:1.1};
+function L5(){S.tr=0;sc.storm=1;talk(ROSA,[
+ 'Storm Pass is ahead, and there are no detours. Every business faces risk. The smart move is to decide in advance which risks to cover.',
+ {t:'You can only afford so much protection, so you must choose where it counts most.',ask:[{q:'What is insurance?',a:'You pay a small, known cost called a premium so an insurer covers a large, uncertain loss. It works best for losses that are unlikely but would be devastating.'},{q:'How do I rank risks?',a:'Look at two things: how likely the loss is and how big it would be. A loss that could end your business must be covered first, even if it is unlikely.'}]},
+ 'Three events could hit you in the storm. You have eight hundred dollars to spend on protection. Review the risks, then choose your coverage.'],L5a);}
+function L5a(){const R=[
+ {id:'eq',risk:'Equipment breakdown',like:'Likely: 4 in 10',loss:2000,cov:'Equipment warranty',prem:250},
+ {id:'slow',risk:'Slow sales month',like:'Very likely: 6 in 10',loss:1500,cov:'Income-protection policy',prem:350},
+ {id:'sue',risk:'Customer injury lawsuit',like:'Unlikely: 1 in 10',loss:30000,cov:'Liability insurance',prem:300}];
+ const bought={},tot=el('div',{class:'card','aria-live':'polite'}),list=el('div',{});
+ function spent(){return R.reduce((s,r)=>s+(bought[r.id]?r.prem:0),0);}
+ function upd(){tot.textContent='Spent on protection: '+fmt(spent())+' of $800. Left: '+fmt(800-spent())+'.';}
+ R.forEach(r=>{const b=btn('Buy '+r.cov+' ('+fmt(r.prem)+')',()=>{if(!bought[r.id]&&spent()+r.prem>800){sfx.bad();announce('Not enough budget. You have '+fmt(800-spent())+' left.');return;}bought[r.id]=!bought[r.id];b.setAttribute('aria-pressed',!!bought[r.id]);upd();},'alt',{'aria-pressed':'false'});list.append(el('div',{class:'card'},el('b',{},r.risk),el('span',{class:'tag'},r.like),el('div',{},'Possible loss: ',el('b',{},fmt(r.loss))),el('div',{class:'row',style:'justify-content:flex-start'},b)));});
+ const go=btn('Face the storm',storm,'primary');
+ function storm(){sc.storm=2;sfx.boom();let uncov=0;const sp=spent();
+  show(el('h2',{},'The storm hits...'),el('div',{id:'log','aria-live':'polite'}));const log=$('#log');
+  const lines=R.map(r=>({r,c:!!bought[r.id]}));lines.forEach(l=>{if(!l.c&&l.r.id!=='sue')uncov+=l.r.loss;});
+  const lawsuit=lines.find(l=>l.r.id==='sue'&&!l.c),d=S.anim?900:100;
+  lines.forEach((l,i)=>setTimeout(()=>{sc.flash=1;sfx.boom();const m=l.r.risk+': '+(l.c?'covered by your '+l.r.cov.toLowerCase()+'. You pay $0.':'not covered. You pay '+fmt(l.r.loss)+'.');log.append(el('div',{class:'card'},m));announce(m);},d*(i+1)));
+  setTimeout(()=>{sc.storm=0;if(lawsuit){S.tr++;fb(false,'A customer injury lawsuit for $30,000 would end the business. The storm rewinds. A rare but devastating loss is exactly what insurance is for. Rebuild your coverage.','Rewind and try again',L5a);}else{
+   fb(true,'You survived the storm. Your protection cost '+fmt(sp)+' and the uncovered losses cost '+fmt(uncov)+'. Cover the catastrophic risk first, then protect against the biggest likely loss you can afford to cover.','Continue',()=>passLevel(4,'You can now rank risks by likelihood and size, and decide what to insure.',-(sp+uncov)));}
+  },d*(lines.length+1)+400);}
+ show(el('h2',{},'Challenge: Choose your coverage'),el('p',{class:'say'},'Budget: $800. You cannot buy everything.'),list,tot,el('div',{class:'row'},go));upd();speak('Challenge. You have eight hundred dollars. Choose which risks to cover before the storm.',1);}
+
+/* ---------- LEVEL 6: investing ---------- */
+const IVY={name:'Ivy Compound',role:'Investing Guide',pitch:1};
+function L6(){S.tr=0;talk(IVY,[
+ 'You made it to Compound Canyon, the last stop before Launch City. This is where small money, given time, becomes big money.',
+ {t:'The secret is not a hot tip. It is time and a steady return.',ask:[{q:'What is compound interest?',a:'Interest earned on your original money and on the interest it already earned. Growth builds on growth, so the curve bends upward the longer you wait.'},{q:'What is the Rule of 72?',a:'A quick estimate. Divide 72 by the yearly return in percent to get the years it takes to double. At 6 percent, money doubles in about 12 years.'}]},
+ 'You have two thousand dollars to invest for thirty years. Run the experiments, then answer two quick questions.'],L6a);}
+function L6a(){const done={a:false,b:false};
+ const cvs=el('canvas',{class:'chart',width:640,height:300,role:'img','aria-label':'Line chart of investment growth over 30 years. Values are in the table below.'}),tbl=el('div',{}),go=btn('Continue to the questions',L6q,'primary',{style:'display:none'});
+ let anim=null;
+ const val=(l,yr)=>yr<l.start?(l.start>0?0:2000):2000*Math.pow(1+l.r,yr-l.start);
+ function chart(lines,title){if(anim)cancelAnimationFrame(anim);const g=cvs.getContext('2d'),max=16000;let p=S.anim?0:1;
+  const step=()=>{p=Math.min(1,p+.015);g.fillStyle='#120d09';g.fillRect(0,0,640,300);g.strokeStyle='#4a3a26';g.fillStyle='#e0d2b3';g.font='14px system-ui';g.lineWidth=1;
+   for(let v=0;v<=16000;v+=4000){const y=270-v/max*250;g.beginPath();g.moveTo(60,y);g.lineTo(630,y);g.stroke();g.fillText('$'+v/1000+'k',8,y+4);}
+   for(let yr=0;yr<=30;yr+=10){g.fillText('Yr '+yr,60+yr/30*560-12,292);}
+   lines.forEach((l,li)=>{g.strokeStyle=l.c;g.lineWidth=4;g.setLineDash(l.dash);g.beginPath();let first=true;for(let yr=0;yr<=30*p+.001;yr+=.5){const v=val(l,yr),x=60+yr/30*560,y=270-Math.min(v,max)/max*250;first?g.moveTo(x,y):g.lineTo(x,y);first=false;}g.stroke();g.setLineDash([]);
+    g.fillStyle=l.c;g.fillRect(380,20+li*20,24,6);g.fillStyle='#fff6e3';g.fillText(l.n,412,28+li*20);});
+   if(p<1)anim=requestAnimationFrame(step);};step();
+  tbl.replaceChildren(el('table',{},el('caption',{},title),el('tr',{},el('th',{},'Option'),el('th',{},'Value after 30 years')),...lines.map(l=>el('tr',{},el('td',{},l.n),el('td',{},fmt(val(l,30)))))));
+  announce(title+'. '+lines.map(l=>l.n+': '+fmt(val(l,30))).join('. '));}
+ const b1=btn('Run: compare three options',()=>{chart([{n:'Cash in a drawer (0%)',r:0,start:0,c:'#e0d2b3',dash:[2,6]},{n:'High-yield savings (4%)',r:.04,start:0,c:'#8cc8ff',dash:[10,5]},{n:'Index fund (7% average)',r:.07,start:0,c:'#6ef0a0',dash:[]}],'$2,000 invested for 30 years');done.a=true;chk();},'alt');
+ const b2=btn('Run: start now vs wait 10 years',()=>{chart([{n:'Index fund, start now',r:.07,start:0,c:'#6ef0a0',dash:[]},{n:'Index fund, start in year 10',r:.07,start:10,c:'#ffd24a',dash:[10,5]}],'Same $2,000 at 7%, starting now or 10 years later');done.b=true;chk();},'alt');
+ function chk(){if(done.a&&done.b)go.style.display='';}
+ show(el('h2',{},'Challenge: Run the experiments'),el('p',{class:'say'},'Run both experiments. The 7 percent figure is a long-run average, not a promise. Real returns rise and fall each year.'),el('div',{class:'row',style:'justify-content:flex-start'},b1,b2),cvs,tbl,el('div',{class:'row'},go));chart([],'');tbl.replaceChildren();speak('Challenge. Run both experiments, then continue to the questions.',1);}
+function L6q(){mcq({title:'Question 1 of 2',q:'You start the same $2,000 at 7 percent, but 10 years later. About how much do you have after the full 30 years?',opts:['About $7,700, roughly half as much','About $13,000','About $15,200, the same','About $10,000'],ci:0,
+ ok:'Waiting 10 years leaves only 20 years of growth, about $7,700 instead of $15,200. Time is the most powerful ingredient.',hint:'Waiting removes 10 years of compounding. Look at the chart you just ran.',done:()=>mcq({title:'Question 2 of 2',q:'Using the Rule of 72, about how many years does it take money to double at 9 percent?',opts:['4 years','8 years','12 years','16 years'],ci:1,ok:'Seventy-two divided by nine is eight years.',hint:'Divide 72 by the return percent.',done:()=>passLevel(5,'You can now see how compounding rewards time, and estimate doubling with the Rule of 72.')})});}
+
+/* ---------- finale ---------- */
+function finale(){sc.th=6;sc.mode='stop';sc.npc=null;sc.fire=[];sfx.good();
+ const stars=S.stars.reduce((a,b)=>a+b,0),ttl=S.score>=520?'Legendary Founder':S.score>=420?'Trailblazer CEO':S.score>=300?'Rising Entrepreneur':'Determined Starter';
+ const take=['Break-even = fixed costs divided by margin per unit','Best price = highest total profit, not highest price','Budget with 50-30-20: needs, wants, savings','Compare loans by total cost of borrowing','Insure rare, devastating risks first','Compound growth rewards starting early'];
+ show(el('h2',{class:'ok'},'Launch City: you made it!'),el('p',{class:'say'},'Trailblazer Bowls is open for business. Your founder title is '+ttl+'.'),
+ el('div',{class:'grid2'},el('div',{class:'card'},'Score',el('div',{class:'big'},S.score)),el('div',{class:'card'},'Stars',el('div',{class:'big'},stars+' of 18')),el('div',{class:'card'},'Cash',el('div',{class:'big'},fmt(S.cash))),el('div',{class:'card'},'Reputation',el('div',{class:'big'},S.rep+' of 100'))),
+ el('div',{class:'card'},el('b',{},'Your six big ideas:'),el('ul',{},take.map(t=>el('li',{},t)))),
+ el('p',{},'Next step: carry these decisions into your Business Canvas Project.'),
+ el('div',{class:'row noprint'},btn('Print my results',()=>window.print(),'alt'),btn('Play again',()=>{Object.assign(S,{lvl:0,cash:5000,rep:50,score:0,stars:[],tr:0});hud();title0();},'primary')));
+ speak('Launch City! Trailblazer Bowls is open for business. Your founder title is '+ttl+'. Your score is '+S.score+'.',1);announce('You reached Launch City. Score '+S.score+'.');
+ if(S.anim)for(let i=0;i<4;i++)setTimeout(()=>burst(60+i*60,30),i*300);}
+
+/* ---------- flow ---------- */
+const LV=[L1,L2,L3,L4,L5,L6];
+function startLevel(n){if(n>=6){travelTo(6,finale);panelTravel(6);return;}travelTo(n,()=>{sc.npc=n;LV[n]();});panelTravel(n);}
+function panelTravel(n){show(el('h2',{},n<6?'On the trail to '+TH[n].n:'On the road to Launch City'),el('p',{class:'say'},n<6?'Stop '+(n+1)+' of 6. Wagon wheels rolling...':'The skyline is in sight.'),el('div',{class:'row'},btn('Skip ahead',()=>{sc.tp=1;},'ghost')));speak(n<6?'Next stop: '+TH[n].n+'.':'Launch City is in sight.',1);}
+function title0(){sc.th=0;sc.mode='stop';sc.npc=null;sc.fire=[];sc.storm=0;
+ show(el('h2',{},'The Road to Launch City'),el('p',{class:'say'},'You are a first-time founder with a food wagon, $5,000, and a big idea. Six stops stand between you and Launch City. At each one, meet a guide, learn a money skill, and pass a challenge to roll on.'),
+ el('div',{class:'card'},el('b',{},'How to play: '),'Click or tap buttons, or use Tab and Enter. Every screen has captions. Use the buttons at the top to turn voice, sound, or animation on or off.'),
+ el('div',{class:'row'},btn('Start the journey',()=>{S.lvl=0;hud();startLevel(0);},'primary')));}
+function wire(){const t=(id,key,fn)=>{const b=$(id);b.addEventListener('click',()=>{S[key]=!S[key];b.setAttribute('aria-pressed',S[key]);fn&&fn();});b.setAttribute('aria-pressed',S[key]);};
+ t('#bVoice','voice',()=>{if(!S.voice&&'speechSynthesis' in window)speechSynthesis.cancel();});t('#bSfx','sfx');t('#bAnim','anim',()=>document.body.classList.toggle('noanim',!S.anim));
+ if(!S.anim)document.body.classList.add('noanim');}
+wire();hud();title0();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
